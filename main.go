@@ -9,27 +9,11 @@ import (
 	"net/http"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/mysteryboy73/Superman-Detector/models"
 )
 
-type currentGeo struct {
-	Lat    float64 `json:"lat"`
-	Lon    float64 `json:"lon"`
-	Radius int     `json:"radius"`
-}
-
-type travelResponse struct {
-	Current currentGeo `json:"currentGeo"`
-}
-
-type loginRequest struct {
-	Username      string `json:"username"`
-	UnixTimestamp int    `json:"unix_timestamp"`
-	EventUUID     string `json:"event_uuid"`
-	IPAddress     string `json:"ip_address"`
-}
-
-func getCurrentLocation(login loginRequest) currentGeo {
-	var currentLocation currentGeo
+func getCurrentLocation(login models.LoginRequest) models.CurrentGeo {
+	var currentLocation models.CurrentGeo
 
 	database, err := sql.Open("sqlite3", "./db/geolite2.db")
 	checkErr(err)
@@ -56,7 +40,7 @@ func checkErr(err error) {
 }
 
 func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
-	var request loginRequest
+	var request models.LoginRequest
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048567)) // Limiting the size of the request body
 	checkErr(err)
 	if err := r.Body.Close(); err != nil {
@@ -70,7 +54,7 @@ func handleLoginRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	response := getCurrentLocation(request)
+	response := models.TravelResponse{CurrentLocation: getCurrentLocation(request)}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
