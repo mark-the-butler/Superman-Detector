@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -12,11 +11,10 @@ import (
 // HandleLoginRequest retrieves data for response
 func HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	var request models.LoginRequest
-	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048567)) // Limiting the size of the request body
-	checkErr(err)
-	if err := r.Body.Close(); err != nil {
-		panic(err)
-	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	CheckErr(err)
+
 	if err := json.Unmarshal(body, &request); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(400)
