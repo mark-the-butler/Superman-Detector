@@ -1,6 +1,6 @@
 package models
 
-// CurrentGeo is used to map the current location data from the db to
+// CurrentGeo holds details of the current login attempts for the response
 type CurrentGeo struct {
 	Lat    float64 `json:"lat"`
 	Lon    float64 `json:"lon"`

@@ -1,6 +1,6 @@
 package models
 
-// LoginRequest is used to map the json request payload to
+// LoginRequest holds details about the login request that was just made
 type LoginRequest struct {
 	Username      string `json:"username"`
 	UnixTimestamp int    `json:"unix_timestamp"`
