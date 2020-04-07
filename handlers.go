@@ -13,14 +13,18 @@ func HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	var request models.LoginRequest
 
 	body, err := ioutil.ReadAll(r.Body)
-	CheckErr(err)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	if err := json.Unmarshal(body, &request); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(400)
+		w.WriteHeader(http.StatusBadRequest)
 		if err := json.NewEncoder(w).Encode(err); err != nil {
 			panic(err)
 		}
+		return
 	}
 
 	response := models.TravelResponse{CurrentLocation: GetCurrentLocation(request)}

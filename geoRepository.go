@@ -12,19 +12,25 @@ func GetCurrentLocation(login models.LoginRequest) models.CurrentGeo {
 	var currentLocation models.CurrentGeo
 
 	database, err := sql.Open("sqlite3", "./db/geolite2.db")
-	CheckErr(err)
+	checkErr(err)
 
 	statement, err := database.Prepare("SELECT latitude, longitude, accuracy_radius FROM blocks WHERE network =?")
-	CheckErr(err)
+	checkErr(err)
 
 	rows, err := statement.Query(login.IPAddress)
-	CheckErr(err)
+	checkErr(err)
 
 	if rows.Next() {
 		err = rows.Scan(&currentLocation.Lat, &currentLocation.Lon, &currentLocation.Radius)
-		CheckErr(err)
+		checkErr(err)
 	}
 
 	rows.Close()
 	return currentLocation
+}
+
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
