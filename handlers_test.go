@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/mysteryboy73/Superman-Detector/models"
@@ -52,7 +53,7 @@ func TestHandleLoginRequest(t *testing.T) {
 		}
 
 		expectedBody := `{"currentGeo":{"lat":1.23,"lon":-4.56,"radius":20},"travelToCurrentGeoSuspicious":false,"traveFromCurrentGeoSuspicious":false}`
-		if response.Body.String() != expectedBody {
+		if strings.TrimRight(response.Body.String(), "\n") != expectedBody {
 			t.Errorf("handler returned unexpected body: got %v want %v", response.Body.String(), expectedBody)
 		}
 	})
