@@ -8,8 +8,19 @@ import (
 	"github.com/mysteryboy73/Superman-Detector/models"
 )
 
+// LoginRequestHandler takes a builder and returns a response
+type LoginRequestHandler struct {
+	responseBuilder ResponseBuilder
+}
+
+// NewLoginRequestHandler creates loginRequestHandler with default responseBuilder
+func NewLoginRequestHandler() *LoginRequestHandler {
+	loginRequestHandler := LoginRequestHandler{responseBuilder: &LoginResponseBuilder{}}
+	return &loginRequestHandler
+}
+
 // HandleLoginRequest retrieves data for response
-func HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
+func (lrh *LoginRequestHandler) HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	var request models.LoginRequest
 
 	body, err := ioutil.ReadAll(r.Body)
@@ -27,7 +38,7 @@ func HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := models.TravelResponse{CurrentLocation: GetCurrentLocation(request)}
+	response := lrh.responseBuilder.build(request)
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
