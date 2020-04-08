@@ -8,8 +8,8 @@ import (
 )
 
 // GetCurrentLocation retrieves users current location from db
-func GetCurrentLocation(login models.LoginRequest) models.CurrentGeo {
-	var currentLocation models.CurrentGeo
+func GetCurrentLocation(login models.LoginRequest) models.GeoLocation {
+	var currentLocation models.GeoLocation
 
 	database, err := sql.Open("sqlite3", "./db/geolite2.db")
 	checkErr(err)

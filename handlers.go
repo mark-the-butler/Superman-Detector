@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/mysteryboy73/Superman-Detector/models"
@@ -23,13 +22,7 @@ func NewLoginRequestHandler() *LoginRequestHandler {
 func (lrh *LoginRequestHandler) HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	var request models.LoginRequest
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	if err := json.Unmarshal(body, &request); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
 		if err := json.NewEncoder(w).Encode(err); err != nil {
@@ -38,7 +31,15 @@ func (lrh *LoginRequestHandler) HandleLoginRequest(w http.ResponseWriter, r *htt
 		return
 	}
 
-	response := lrh.responseBuilder.build(request)
+	response, err := lrh.responseBuilder.build(request)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusInternalServerError)
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			panic(err)
+		}
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
