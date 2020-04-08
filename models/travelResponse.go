@@ -2,9 +2,9 @@ package models
 
 // TravelResponse is the object that gets serialized as the json response
 type TravelResponse struct {
-	CurrentLocation                CurrentGeo   `json:"currentGeo"`
+	CurrentLocation                GeoLocation  `json:"currentGeo"`
 	TravelToCurrentGeoSuspicious   bool         `json:"travelToCurrentGeoSuspicious"`
 	TravelFromCurrentGeoSuspicious bool         `json:"traveFromCurrentGeoSuspicious"`
-	PreviousLocation               *PreviousGeo `json:"precedingIpAccess,omitempty"`
-	FutureLocation                 *FutureGeo   `json:"subsequentIpAccess,omitempty"`
+	PreviousLocation               *GeoLocation `json:"precedingIpAccess,omitempty"`
+	FutureLocation                 *GeoLocation `json:"subsequentIpAccess,omitempty"`
 }
