@@ -11,21 +11,23 @@ import (
 )
 
 type testbuilder struct {
+	testResponse models.TravelResponse
 }
 
 func (tb *testbuilder) build(request models.LoginRequest) models.TravelResponse {
-	return models.TravelResponse{
-		CurrentLocation: models.CurrentGeo{
-			Lat:    1.23,
-			Lon:    -4.56,
-			Radius: 20,
-		},
-	}
+	return tb.testResponse
 }
 
 var loginRequestHandler = LoginRequestHandler{responseBuilder: &testbuilder{}}
 
 func TestHandleLoginRequest(t *testing.T) {
+	loginRequestHandler.responseBuilder = &testbuilder{testResponse: models.TravelResponse{
+		CurrentLocation: models.CurrentGeo{
+			Lat:    1.23,
+			Lon:    -4.56,
+			Radius: 20,
+		},
+	}}
 	t.Run("Sends back 200 okay with json body", func(t *testing.T) {
 		login := models.LoginRequest{
 			Username:      "Bob",
