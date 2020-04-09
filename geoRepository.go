@@ -7,15 +7,17 @@ import (
 	"github.com/mysteryboy73/Superman-Detector/models"
 )
 
+// DataRepo is an interface for retrieving data from a db
 type DataRepo interface {
-	getCurrentLocation(login models.LoginRequest) (models.GeoLocation, error)
+	getLocation(login models.LoginRequest) (models.GeoLocation, error)
 }
 
+// GeoRepository implements the DataRepo interface for retrieving data from a db
 type GeoRepository struct {
 }
 
 // GetCurrentLocation retrieves users current location from db
-func (gr *GeoRepository) getCurrentLocation(login models.LoginRequest) (models.GeoLocation, error) {
+func (gr *GeoRepository) getLocation(login models.LoginRequest) (models.GeoLocation, error) {
 	var currentLocation models.GeoLocation
 
 	database, err := sql.Open("sqlite3", "./db/geolite2.db")

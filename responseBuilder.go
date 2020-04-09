@@ -1,6 +1,8 @@
 package main
 
-import "github.com/mysteryboy73/Superman-Detector/models"
+import (
+	"github.com/mysteryboy73/Superman-Detector/models"
+)
 
 // ResponseBuilder interface for building response
 type ResponseBuilder interface {
@@ -21,10 +23,12 @@ func NewLoginResponseBuilder() *LoginResponseBuilder {
 // Build constructs a TravelResponse
 func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.TravelResponse, error) {
 	var response models.TravelResponse
-	currentLocation, err := lrb.geoRepository.getCurrentLocation(request)
+	currentLocation, err := lrb.geoRepository.getLocation(request)
+
 	if err != nil {
-		panic(err)
+		return models.TravelResponse{}, err
 	}
+
 	response.CurrentLocation = currentLocation
 	return response, nil
 }
