@@ -9,9 +9,22 @@ type ResponseBuilder interface {
 
 // LoginResponseBuilder retrieves necessary data for response
 type LoginResponseBuilder struct {
+	geoRepository DataRepo
 }
 
-func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (response models.TravelResponse, err error) {
-	repsonse := models.TravelResponse{CurrentLocation: GetCurrentLocation(request)}
-	return repsonse, nil
+// NewLoginResponseBuilder returns a LoginResponseBuilder with repository dependency
+func NewLoginResponseBuilder() *LoginResponseBuilder {
+	loginResponseBuilder := LoginResponseBuilder{geoRepository: &GeoRepository{}}
+	return &loginResponseBuilder
+}
+
+// Build constructs a TravelResponse
+func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.TravelResponse, error) {
+	var response models.TravelResponse
+	currentLocation, err := lrb.geoRepository.getCurrentLocation(request)
+	if err != nil {
+		panic(err)
+	}
+	response.CurrentLocation = currentLocation
+	return response, nil
 }

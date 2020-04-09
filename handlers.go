@@ -14,7 +14,7 @@ type LoginRequestHandler struct {
 
 // NewLoginRequestHandler creates loginRequestHandler with default responseBuilder
 func NewLoginRequestHandler() *LoginRequestHandler {
-	loginRequestHandler := LoginRequestHandler{responseBuilder: &LoginResponseBuilder{}}
+	loginRequestHandler := LoginRequestHandler{responseBuilder: NewLoginResponseBuilder()}
 	return &loginRequestHandler
 }
 
