@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/mysteryboy73/Superman-Detector/models"
 )
 
@@ -23,6 +25,13 @@ func NewLoginResponseBuilder() *LoginResponseBuilder {
 // Build constructs a TravelResponse
 func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.TravelResponse, error) {
 	var response models.TravelResponse
+
+	saved := lrb.geoRepository.saveLogin(request)
+
+	if saved != true {
+		return models.TravelResponse{}, errors.New("login could not be saved")
+	}
+
 	currentLocation, err := lrb.geoRepository.getLocation(request)
 
 	if err != nil {
@@ -30,5 +39,6 @@ func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.Trav
 	}
 
 	response.CurrentLocation = currentLocation
+
 	return response, nil
 }

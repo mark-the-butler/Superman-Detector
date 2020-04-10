@@ -10,10 +10,15 @@ import (
 // DataRepo is an interface for retrieving data from a db
 type DataRepo interface {
 	getLocation(login models.LoginRequest) (models.GeoLocation, error)
+	saveLogin(login models.LoginRequest) bool
 }
 
 // GeoRepository implements the DataRepo interface for retrieving data from a db
 type GeoRepository struct {
+}
+
+func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
+	return true
 }
 
 // GetCurrentLocation retrieves users current location from db
@@ -25,6 +30,8 @@ func (gr *GeoRepository) getLocation(login models.LoginRequest) (models.GeoLocat
 
 	statement, err := database.Prepare("SELECT latitude, longitude, accuracy_radius FROM blocks WHERE network =?")
 	checkErr(err)
+
+	statement.Exec()
 
 	rows, err := statement.Query(login.IPAddress)
 	checkErr(err)

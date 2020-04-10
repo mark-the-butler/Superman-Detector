@@ -1,0 +1,4 @@
+db/geolite2.db filter=lfs diff=lfs merge=lfs -text
+db/locations.sql filter=lfs diff=lfs merge=lfs -text
+db/logins.sql filter=lfs diff=lfs merge=lfs -text
+db/blocks.sql filter=lfs diff=lfs merge=lfs -text
