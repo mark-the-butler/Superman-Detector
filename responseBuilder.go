@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/mysteryboy73/Superman-Detector/models"
+	"github.com/umahmood/haversine"
 )
 
 // ResponseBuilder interface for building response
@@ -50,6 +51,14 @@ func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.Trav
 	futureLocation.IP = futureLogin.IPAddress
 	futureLocation.TimeStamp = futureLogin.UnixTimestamp
 
+	// Tack on speed
+	previousLocation.Speed = calculateGeoSuspiciousSpeed(previousLogin, request, previousLocation, currentLocation)
+	futureLocation.Speed = calculateGeoSuspiciousSpeed(request, futureLogin, currentLocation, futureLocation)
+
+	// Tack on geo suspicious
+	response.TravelFromCurrentGeoSuspicious = previousLocation.Speed > 500
+	response.TravelToCurrentGeoSuspicious = futureLocation.Speed > 500
+
 	response.CurrentLocation = currentLocation
 	response.PreviousLocation = &previousLocation
 	response.FutureLocation = &futureLocation
@@ -57,6 +66,23 @@ func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.Trav
 	return response, nil
 }
 
-func calculateGeoSuspicious() {
+func calculateGeoSuspiciousSpeed(fromLogin models.LoginRequest, toLogin models.LoginRequest, fromLocation models.GeoLocation, toLocation models.GeoLocation) int {
+	// Get time differences
+	timeTraveled := calculateTimeDifferenceInHours(fromLogin.UnixTimestamp, toLogin.UnixTimestamp)
 
+	// Distance between latitudes and longitudes
+	location1 := haversine.Coord{Lat: fromLocation.Lat, Lon: fromLocation.Lon}
+	location2 := haversine.Coord{Lat: toLocation.Lat, Lon: toLocation.Lon}
+	distanceMi, _ := haversine.Distance(location1, location2)
+
+	// Find speed travled
+	speed := distanceMi / timeTraveled
+
+	return int(speed)
+}
+
+func calculateTimeDifferenceInHours(startTime int, endTime int) float64 {
+	timeDifferenceSecond := endTime - startTime
+	timeDifferenceHours := timeDifferenceSecond / 3600
+	return float64(timeDifferenceHours)
 }

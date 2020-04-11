@@ -31,7 +31,7 @@ func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
 	database, err := sqlx.Open("sqlite3", "./db/geolite2.db")
 	checkErr(err)
 
-	statement, err := database.Prepare("INSERT INTO logins(user_name, time_stamp, event_uuid, ip_address) values(?,?,?,?)")
+	statement, err := database.Prepare("INSERT OR IGNORE INTO logins(user_name, time_stamp, event_uuid, ip_address) values(?,?,?,?)")
 	checkErr(err)
 
 	res, err := statement.Exec(login.Username, login.UnixTimestamp, login.EventUUID, login.IPAddress)
@@ -39,7 +39,6 @@ func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
 
 	rows, err := res.RowsAffected()
 
-	// Need to figure out what rows is and not saved record to db if it exist
 	fmt.Printf(string(rows))
 
 	if err != nil {
