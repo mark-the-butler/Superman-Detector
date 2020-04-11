@@ -40,5 +40,7 @@ func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.Trav
 
 	response.CurrentLocation = currentLocation
 
+	lrb.geoRepository.getIPAdresses(request.Username, request.IPAddress, request.UnixTimestamp)
+
 	return response, nil
 }

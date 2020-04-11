@@ -24,6 +24,10 @@ func (tr *testRepo) getLocation(request models.LoginRequest) (models.GeoLocation
 	return tr.response, tr.err
 }
 
+func (tr *testRepo) getIPAdresses(username string, currentIP string, currentTimeStamp int) (previousIP, futureIP string) {
+	return
+}
+
 var responseBuilder = LoginResponseBuilder{geoRepository: &testRepo{}}
 
 func TestResponseBuilder(t *testing.T) {
