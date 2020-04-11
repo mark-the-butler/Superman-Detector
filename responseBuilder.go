@@ -32,15 +32,31 @@ func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.Trav
 		return models.TravelResponse{}, errors.New("login could not be saved")
 	}
 
-	currentLocation, err := lrb.geoRepository.getLocation(request)
+	currentLocation, err := lrb.geoRepository.getLocation(request.IPAddress)
 
 	if err != nil {
 		return models.TravelResponse{}, err
 	}
 
-	response.CurrentLocation = currentLocation
+	previousLogin, futureLogin := lrb.geoRepository.getPreviousAndFutureIPAdress(request.Username, request.IPAddress, request.UnixTimestamp) // Should also probably return an error
 
-	lrb.geoRepository.getIPAdresses(request.Username, request.IPAddress, request.UnixTimestamp)
+	// Get previous and future location information
+	previousLocation, _ := lrb.geoRepository.getLocation(previousLogin.IPAddress)
+	futureLocation, _ := lrb.geoRepository.getLocation(futureLogin.IPAddress)
+
+	// Tack on ip addresses and timestamp to resposne
+	previousLocation.IP = previousLogin.IPAddress
+	previousLocation.TimeStamp = previousLogin.UnixTimestamp
+	futureLocation.IP = futureLogin.IPAddress
+	futureLocation.TimeStamp = futureLogin.UnixTimestamp
+
+	response.CurrentLocation = currentLocation
+	response.PreviousLocation = &previousLocation
+	response.FutureLocation = &futureLocation
 
 	return response, nil
+}
+
+func calculateGeoSuspicious() {
+
 }

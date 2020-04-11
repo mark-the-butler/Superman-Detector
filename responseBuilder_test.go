@@ -20,11 +20,11 @@ func (tr *testRepo) saveLogin(request models.LoginRequest) bool {
 	return tr.saved
 }
 
-func (tr *testRepo) getLocation(request models.LoginRequest) (models.GeoLocation, error) {
+func (tr *testRepo) getLocation(ipAddress string) (models.GeoLocation, error) {
 	return tr.response, tr.err
 }
 
-func (tr *testRepo) getIPAdresses(username string, currentIP string, currentTimeStamp int) (previousIP, futureIP string) {
+func (tr *testRepo) getPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest) {
 	return
 }
 

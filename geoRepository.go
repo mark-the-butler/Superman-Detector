@@ -10,9 +10,9 @@ import (
 
 // DataRepo is an interface for retrieving data from a db
 type DataRepo interface {
-	getLocation(login models.LoginRequest) (models.GeoLocation, error)
+	getLocation(ipAddress string) (models.GeoLocation, error)
 	saveLogin(login models.LoginRequest) bool
-	getIPAdresses(username string, currentIP string, currentTimeStamp int) (previousIP, futureIP string)
+	getPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest)
 }
 
 type loginAttempt struct {
@@ -50,7 +50,7 @@ func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
 }
 
 // GetCurrentLocation retrieves users current location from db
-func (gr *GeoRepository) getLocation(login models.LoginRequest) (models.GeoLocation, error) {
+func (gr *GeoRepository) getLocation(ipAddress string) (models.GeoLocation, error) {
 	var currentLocation models.GeoLocation
 
 	database, err := sqlx.Open("sqlite3", "./db/geolite2.db")
@@ -59,7 +59,7 @@ func (gr *GeoRepository) getLocation(login models.LoginRequest) (models.GeoLocat
 	statement, err := database.Prepare("SELECT latitude, longitude, accuracy_radius FROM blocks WHERE network =?")
 	checkErr(err)
 
-	rows, err := statement.Query(login.IPAddress)
+	rows, err := statement.Query(ipAddress)
 	checkErr(err)
 
 	if rows.Next() {
@@ -72,7 +72,7 @@ func (gr *GeoRepository) getLocation(login models.LoginRequest) (models.GeoLocat
 	return currentLocation, nil
 }
 
-func (gr *GeoRepository) getIPAdresses(username string, currentIP string, currentTimeStamp int) (previousIP, futureIP string) {
+func (gr *GeoRepository) getPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest) {
 	database, err := sqlx.Open("sqlite3", "./db/geolite2.db")
 	checkErr(err)
 
@@ -88,18 +88,23 @@ func (gr *GeoRepository) getIPAdresses(username string, currentIP string, curren
 
 	for _, attempt := range loginAttempts {
 		if attempt.IPAddress != currentIP && attempt.UnixTimestamp < currentTimeStamp {
-			previousIP = attempt.IPAddress
+			previousLogin.Username = attempt.Username
+			previousLogin.UnixTimestamp = attempt.UnixTimestamp
+			previousLogin.EventUUID = attempt.EventUUID
+			previousLogin.IPAddress = attempt.IPAddress
 		}
 
 		if attempt.IPAddress != currentIP && attempt.UnixTimestamp > currentTimeStamp {
-			futureIP = attempt.IPAddress
+			futureLogin.IPAddress = attempt.IPAddress
+			futureLogin.UnixTimestamp = attempt.UnixTimestamp
+			futureLogin.EventUUID = attempt.EventUUID
+			futureLogin.IPAddress = attempt.IPAddress
 		}
 	}
 
-	fmt.Printf("The previous IP was %v and the future IP is %v", previousIP, futureIP)
 	statement.Close()
 
-	return previousIP, futureIP
+	return previousLogin, futureLogin
 }
 
 func checkErr(err error) {
