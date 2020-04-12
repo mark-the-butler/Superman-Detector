@@ -23,6 +23,7 @@ func NewLoginRequestHandler() *LoginRequestHandler {
 func (lrh *LoginRequestHandler) HandleLoginRequest(w http.ResponseWriter, r *http.Request) {
 	var request models.LoginRequest
 
+	// Decode the json response body into a LoginRequest model
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusBadRequest)
@@ -32,6 +33,7 @@ func (lrh *LoginRequestHandler) HandleLoginRequest(w http.ResponseWriter, r *htt
 		return
 	}
 
+	// Call the builder to build the response
 	response, err := lrh.responseBuilder.Build(request)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -42,6 +44,7 @@ func (lrh *LoginRequestHandler) HandleLoginRequest(w http.ResponseWriter, r *htt
 		return
 	}
 
+	// Send back the response in json format
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {

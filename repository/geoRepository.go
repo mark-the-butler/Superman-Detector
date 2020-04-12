@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3" // Driver to connect to sqlite db
@@ -31,15 +31,12 @@ func NewGeoRepository() *GeoRepository {
 
 // SaveLogin saves login attempts to the database if they have not been saved before
 func (gr *GeoRepository) SaveLogin(login models.LoginRequest) bool {
-	statement, err := gr.database.Prepare("INSERT OR IGNORE INTO logins(user_name, time_stamp, event_uuid, ip_address) values(?,?,?,?)")
+	statement, prepErr := gr.database.Prepare("INSERT OR IGNORE INTO logins(user_name, time_stamp, event_uuid, ip_address) values(?,?,?,?)")
+	checkErr(prepErr)
+
+	_, err := statement.Exec(login.Username, login.UnixTimestamp, login.EventUUID, login.IPAddress)
 	checkErr(err)
-
-	res, err := statement.Exec(login.Username, login.UnixTimestamp, login.EventUUID, login.IPAddress)
-	checkErr(err)
-
-	rows, err := res.RowsAffected()
-
-	fmt.Printf(string(rows))
+	defer statement.Close()
 
 	if err != nil {
 		return false
@@ -57,28 +54,28 @@ func (gr *GeoRepository) GetLocation(ipAddress string) (models.GeoLocation, erro
 
 	rows, err := statement.Query(ipAddress)
 	checkErr(err)
+	defer statement.Close()
 
 	if rows.Next() {
 		err = rows.Scan(&currentLocation.Lat, &currentLocation.Lon, &currentLocation.Radius)
 		checkErr(err)
 	}
+	defer rows.Close()
 
-	rows.Close()
-	statement.Close()
 	return currentLocation, nil
 }
 
 // GetPreviousAndFutureIPAdress gets the ip addresses of the previous login attempt and the subsequent login attempt from the current login attempt
 func (gr *GeoRepository) GetPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest) {
 	loginAttempts := []models.Logins{}
-	statement, _ := gr.database.Preparex(`with cte as (select row_number() over(order by time_stamp desc) row_num,* from logins where user_name = $1),
+	statement, err := gr.database.Preparex(`with cte as (select row_number() over(order by time_stamp desc) row_num,* from logins where user_name = $1),
 	current as (select row_num from cte where ip_address = $2)
 	select cte.* from cte, current where abs(cte.row_num - current.row_num) <= 1 order by cte.time_stamp desc;`)
+	checkErr(err)
+	defer statement.Close()
 
-	if queryError := statement.Select(&loginAttempts, username, currentIP); queryError != nil {
-		fmt.Printf(queryError.Error())
-		panic(queryError)
-	}
+	queryError := statement.Select(&loginAttempts, username, currentIP)
+	checkErr(queryError)
 
 	for _, attempt := range loginAttempts {
 		if attempt.IPAddress != currentIP && attempt.UnixTimestamp < currentTimeStamp {
@@ -96,13 +93,11 @@ func (gr *GeoRepository) GetPreviousAndFutureIPAdress(username string, currentIP
 		}
 	}
 
-	statement.Close()
-
 	return previousLogin, futureLogin
 }
 
 func checkErr(err error) {
 	if err != nil {
-		panic(err)
+		log.Printf(err.Error())
 	}
 }

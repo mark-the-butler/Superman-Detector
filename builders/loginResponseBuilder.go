@@ -28,18 +28,20 @@ func NewLoginResponseBuilder() *LoginResponseBuilder {
 func (lrb *LoginResponseBuilder) Build(request models.LoginRequest) (models.TravelResponse, error) {
 	var response models.TravelResponse
 
+	// Save current login attempt to the database
 	saved := lrb.geoRepository.SaveLogin(request)
 
 	if saved != true {
 		return models.TravelResponse{}, errors.New("login could not be saved")
 	}
 
+	// Retrieve the current login attempt location information
 	currentLocation, err := lrb.geoRepository.GetLocation(request.IPAddress)
-
 	if err != nil {
-		return models.TravelResponse{}, err
+		return models.TravelResponse{}, errors.New("could not retrieve location")
 	}
 
+	// Get the details of the previous and subsequent login attempts
 	previousLogin, futureLogin := lrb.geoRepository.GetPreviousAndFutureIPAdress(request.Username, request.IPAddress, request.UnixTimestamp) // Should also probably return an error
 
 	// Get previous and future location information
