@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  superman-detector:
+    build: .
+    volumes:
+      - ../db/geolite2.db:/db/geolite2.db
+    ports:
+      - 1210:8080

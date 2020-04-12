@@ -22,7 +22,7 @@ type GeoRepository struct {
 
 // NewGeoRepository creates a geo repository with database connection
 func NewGeoRepository() *GeoRepository {
-	database, err := sqlx.Open("sqlite3", "./db/geolite2.db")
+	database, err := sqlx.Open("sqlite3", "../db/geolite2.db")
 	checkErr(err)
 
 	geoRepository := GeoRepository{database: *database}
@@ -89,7 +89,7 @@ func (gr *GeoRepository) GetPreviousAndFutureIPAdress(username string, currentIP
 		}
 
 		if attempt.IPAddress != currentIP && attempt.UnixTimestamp > currentTimeStamp {
-			futureLogin.IPAddress = attempt.IPAddress
+			futureLogin.Username = attempt.Username
 			futureLogin.UnixTimestamp = attempt.UnixTimestamp
 			futureLogin.EventUUID = attempt.EventUUID
 			futureLogin.IPAddress = attempt.IPAddress
