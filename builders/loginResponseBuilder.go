@@ -1,49 +1,50 @@
-package main
+package builders
 
 import (
 	"errors"
 
 	"github.com/mysteryboy73/Superman-Detector/models"
+	"github.com/mysteryboy73/Superman-Detector/repository"
 	"github.com/umahmood/haversine"
 )
 
 // ResponseBuilder interface for building response
 type ResponseBuilder interface {
-	build(loginRequest models.LoginRequest) (response models.TravelResponse, err error)
+	Build(loginRequest models.LoginRequest) (response models.TravelResponse, err error)
 }
 
 // LoginResponseBuilder retrieves necessary data for response
 type LoginResponseBuilder struct {
-	geoRepository DataRepo
+	geoRepository repository.DataRepo
 }
 
 // NewLoginResponseBuilder returns a LoginResponseBuilder with repository dependency
 func NewLoginResponseBuilder() *LoginResponseBuilder {
-	loginResponseBuilder := LoginResponseBuilder{geoRepository: NewGeoRepository()}
+	loginResponseBuilder := LoginResponseBuilder{geoRepository: repository.NewGeoRepository()}
 	return &loginResponseBuilder
 }
 
 // Build constructs a TravelResponse
-func (lrb *LoginResponseBuilder) build(request models.LoginRequest) (models.TravelResponse, error) {
+func (lrb *LoginResponseBuilder) Build(request models.LoginRequest) (models.TravelResponse, error) {
 	var response models.TravelResponse
 
-	saved := lrb.geoRepository.saveLogin(request)
+	saved := lrb.geoRepository.SaveLogin(request)
 
 	if saved != true {
 		return models.TravelResponse{}, errors.New("login could not be saved")
 	}
 
-	currentLocation, err := lrb.geoRepository.getLocation(request.IPAddress)
+	currentLocation, err := lrb.geoRepository.GetLocation(request.IPAddress)
 
 	if err != nil {
 		return models.TravelResponse{}, err
 	}
 
-	previousLogin, futureLogin := lrb.geoRepository.getPreviousAndFutureIPAdress(request.Username, request.IPAddress, request.UnixTimestamp) // Should also probably return an error
+	previousLogin, futureLogin := lrb.geoRepository.GetPreviousAndFutureIPAdress(request.Username, request.IPAddress, request.UnixTimestamp) // Should also probably return an error
 
 	// Get previous and future location information
-	previousLocation, _ := lrb.geoRepository.getLocation(previousLogin.IPAddress)
-	futureLocation, _ := lrb.geoRepository.getLocation(futureLogin.IPAddress)
+	previousLocation, _ := lrb.geoRepository.GetLocation(previousLogin.IPAddress)
+	futureLocation, _ := lrb.geoRepository.GetLocation(futureLogin.IPAddress)
 
 	// Tack on ip addresses and timestamp to resposne
 	previousLocation.IP = previousLogin.IPAddress

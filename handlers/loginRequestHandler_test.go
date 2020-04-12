@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ type testbuilder struct {
 	err          error
 }
 
-func (tb *testbuilder) build(request models.LoginRequest) (models.TravelResponse, error) {
+func (tb *testbuilder) Build(request models.LoginRequest) (models.TravelResponse, error) {
 	return tb.testResponse, tb.err
 }
 

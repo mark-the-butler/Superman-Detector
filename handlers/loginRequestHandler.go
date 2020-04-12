@@ -1,20 +1,21 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/mysteryboy73/Superman-Detector/builders"
 	"github.com/mysteryboy73/Superman-Detector/models"
 )
 
 // LoginRequestHandler takes a builder and returns a response
 type LoginRequestHandler struct {
-	responseBuilder ResponseBuilder
+	responseBuilder builders.ResponseBuilder
 }
 
 // NewLoginRequestHandler creates loginRequestHandler with default responseBuilder
 func NewLoginRequestHandler() *LoginRequestHandler {
-	loginRequestHandler := LoginRequestHandler{responseBuilder: NewLoginResponseBuilder()}
+	loginRequestHandler := LoginRequestHandler{responseBuilder: builders.NewLoginResponseBuilder()}
 	return &loginRequestHandler
 }
 
@@ -31,7 +32,7 @@ func (lrh *LoginRequestHandler) HandleLoginRequest(w http.ResponseWriter, r *htt
 		return
 	}
 
-	response, err := lrh.responseBuilder.build(request)
+	response, err := lrh.responseBuilder.Build(request)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusInternalServerError)

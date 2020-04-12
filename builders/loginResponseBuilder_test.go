@@ -1,4 +1,4 @@
-package main
+package builders
 
 import (
 	"errors"
@@ -15,16 +15,16 @@ type testRepo struct {
 	saveCalled *bool
 }
 
-func (tr *testRepo) saveLogin(request models.LoginRequest) bool {
+func (tr *testRepo) SaveLogin(request models.LoginRequest) bool {
 	*tr.saveCalled = true
 	return tr.saved
 }
 
-func (tr *testRepo) getLocation(ipAddress string) (models.GeoLocation, error) {
+func (tr *testRepo) GetLocation(ipAddress string) (models.GeoLocation, error) {
 	return tr.response, tr.err
 }
 
-func (tr *testRepo) getPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest) {
+func (tr *testRepo) GetPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest) {
 	return
 }
 
@@ -57,7 +57,7 @@ func TestResponseBuilder(t *testing.T) {
 
 		responseBuilder.geoRepository = &testRepo{response: expectedLocation, saved: true, saveCalled: &defaultSave}
 
-		actual, _ := responseBuilder.build(loginRequest)
+		actual, _ := responseBuilder.Build(loginRequest)
 
 		if reflect.DeepEqual(actual.CurrentLocation, expectedLocation) != true {
 			t.Errorf("builder returned incorrect current location: got %+v\n want %+v\n", actual.CurrentLocation, expectedLocation)
@@ -78,7 +78,7 @@ func TestResponseBuilder(t *testing.T) {
 
 		responseBuilder.geoRepository = &testRepo{response: models.GeoLocation{}, err: errors.New(expectedError), saveCalled: &defaultSave, saved: true}
 
-		actual, err := responseBuilder.build(loginRequest)
+		actual, err := responseBuilder.Build(loginRequest)
 
 		if actual != expectedResponse {
 			t.Errorf("builder returned a response but wanted it to be nil")
@@ -94,7 +94,7 @@ func TestResponseBuilder(t *testing.T) {
 
 		responseBuilder.geoRepository = &testRepo{saveCalled: &saveCalled}
 
-		actual, _ := responseBuilder.build(loginRequest)
+		actual, _ := responseBuilder.Build(loginRequest)
 
 		if saveCalled != true {
 			t.Errorf("builder did not make any save calls")
@@ -111,7 +111,7 @@ func TestResponseBuilder(t *testing.T) {
 
 		responseBuilder.geoRepository = &testRepo{saved: false, saveCalled: &defaultSave}
 
-		actual, err := responseBuilder.build(loginRequest)
+		actual, err := responseBuilder.Build(loginRequest)
 
 		if err.Error() != expectedError {
 			t.Errorf("builder returned incorrect error: got %v want %v", err.Error(), expectedError)

@@ -1,18 +1,18 @@
-package main
+package repository
 
 import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // Driver to connect to sqlite db
 	"github.com/mysteryboy73/Superman-Detector/models"
 )
 
 // DataRepo is an interface for retrieving data from a db
 type DataRepo interface {
-	getLocation(ipAddress string) (models.GeoLocation, error)
-	saveLogin(login models.LoginRequest) bool
-	getPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest)
+	GetLocation(ipAddress string) (models.GeoLocation, error)
+	SaveLogin(login models.LoginRequest) bool
+	GetPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest)
 }
 
 // GeoRepository implements the DataRepo interface for retrieving data from a db
@@ -29,7 +29,8 @@ func NewGeoRepository() *GeoRepository {
 	return &geoRepository
 }
 
-func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
+// SaveLogin saves login attempts to the database if they have not been saved before
+func (gr *GeoRepository) SaveLogin(login models.LoginRequest) bool {
 	statement, err := gr.database.Prepare("INSERT OR IGNORE INTO logins(user_name, time_stamp, event_uuid, ip_address) values(?,?,?,?)")
 	checkErr(err)
 
@@ -47,8 +48,8 @@ func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
 	return true
 }
 
-// GetCurrentLocation retrieves users current location from db
-func (gr *GeoRepository) getLocation(ipAddress string) (models.GeoLocation, error) {
+// GetLocation retrieves users current location from db
+func (gr *GeoRepository) GetLocation(ipAddress string) (models.GeoLocation, error) {
 	var currentLocation models.GeoLocation
 
 	statement, err := gr.database.Prepare("SELECT latitude, longitude, accuracy_radius FROM blocks WHERE network =?")
@@ -67,7 +68,8 @@ func (gr *GeoRepository) getLocation(ipAddress string) (models.GeoLocation, erro
 	return currentLocation, nil
 }
 
-func (gr *GeoRepository) getPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest) {
+// GetPreviousAndFutureIPAdress gets the ip addresses of the previous login attempt and the subsequent login attempt from the current login attempt
+func (gr *GeoRepository) GetPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest) {
 	loginAttempts := []models.Logins{}
 	statement, _ := gr.database.Preparex(`with cte as (select row_number() over(order by time_stamp desc) row_num,* from logins where user_name = $1),
 	current as (select row_num from cte where ip_address = $2)
