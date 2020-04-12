@@ -19,7 +19,7 @@ type LoginResponseBuilder struct {
 
 // NewLoginResponseBuilder returns a LoginResponseBuilder with repository dependency
 func NewLoginResponseBuilder() *LoginResponseBuilder {
-	loginResponseBuilder := LoginResponseBuilder{geoRepository: &GeoRepository{}}
+	loginResponseBuilder := LoginResponseBuilder{geoRepository: NewGeoRepository()}
 	return &loginResponseBuilder
 }
 

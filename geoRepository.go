@@ -15,23 +15,22 @@ type DataRepo interface {
 	getPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest)
 }
 
-type loginAttempt struct {
-	RowNum        int    `db:"row_num"`
-	Username      string `db:"user_name"`
-	UnixTimestamp int    `db:"time_stamp"`
-	EventUUID     string `db:"event_uuid"`
-	IPAddress     string `db:"ip_address"`
-}
-
 // GeoRepository implements the DataRepo interface for retrieving data from a db
 type GeoRepository struct {
+	database sqlx.DB
 }
 
-func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
+// NewGeoRepository creates a geo repository with database connection
+func NewGeoRepository() *GeoRepository {
 	database, err := sqlx.Open("sqlite3", "./db/geolite2.db")
 	checkErr(err)
 
-	statement, err := database.Prepare("INSERT OR IGNORE INTO logins(user_name, time_stamp, event_uuid, ip_address) values(?,?,?,?)")
+	geoRepository := GeoRepository{database: *database}
+	return &geoRepository
+}
+
+func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
+	statement, err := gr.database.Prepare("INSERT OR IGNORE INTO logins(user_name, time_stamp, event_uuid, ip_address) values(?,?,?,?)")
 	checkErr(err)
 
 	res, err := statement.Exec(login.Username, login.UnixTimestamp, login.EventUUID, login.IPAddress)
@@ -52,10 +51,7 @@ func (gr *GeoRepository) saveLogin(login models.LoginRequest) bool {
 func (gr *GeoRepository) getLocation(ipAddress string) (models.GeoLocation, error) {
 	var currentLocation models.GeoLocation
 
-	database, err := sqlx.Open("sqlite3", "./db/geolite2.db")
-	checkErr(err)
-
-	statement, err := database.Prepare("SELECT latitude, longitude, accuracy_radius FROM blocks WHERE network =?")
+	statement, err := gr.database.Prepare("SELECT latitude, longitude, accuracy_radius FROM blocks WHERE network =?")
 	checkErr(err)
 
 	rows, err := statement.Query(ipAddress)
@@ -72,11 +68,8 @@ func (gr *GeoRepository) getLocation(ipAddress string) (models.GeoLocation, erro
 }
 
 func (gr *GeoRepository) getPreviousAndFutureIPAdress(username string, currentIP string, currentTimeStamp int) (previousLogin, futureLogin models.LoginRequest) {
-	database, err := sqlx.Open("sqlite3", "./db/geolite2.db")
-	checkErr(err)
-
-	loginAttempts := []loginAttempt{}
-	statement, err := database.Preparex(`with cte as (select row_number() over(order by time_stamp desc) row_num,* from logins where user_name = $1),
+	loginAttempts := []models.Logins{}
+	statement, _ := gr.database.Preparex(`with cte as (select row_number() over(order by time_stamp desc) row_num,* from logins where user_name = $1),
 	current as (select row_num from cte where ip_address = $2)
 	select cte.* from cte, current where abs(cte.row_num - current.row_num) <= 1 order by cte.time_stamp desc;`)
 
