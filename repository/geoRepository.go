@@ -54,6 +54,9 @@ func (gr *GeoRepository) GetLocation(ipAddress string) (models.GeoLocation, erro
 
 	rows, err := statement.Query(ipAddress)
 	checkErr(err)
+	if err != nil {
+		return models.GeoLocation{}, err
+	}
 	defer statement.Close()
 
 	if rows.Next() {
