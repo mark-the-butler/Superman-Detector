@@ -74,6 +74,16 @@ A response is returned in json format that contains location details of the curr
 
 ## Assumptions / Design Decisions :
 
+* With not be super framiliar with Go I tried to stick to what the standard library has to offer so I could get a better handle on what it is trying to accomplish without using a bunch of other libraries.
+
+* Sticking with not trying to use a lot of other libraries I have a lack of an ORM for my repository struct. This means I'm writing sql statements directly in the code which can be inefficient, hard to maintain, and hard to understand.
+
+* While writing the code my C# object oriented background seem to have influence on how I wrote things. Getting more comfortable with Go it seems that it's better suited to be a functional language.
+
+* My code probably does not do the best job with error handling. I struggled with decided when errors should just be logged and when they should completely interrupt the app running.
+
+* Thinking about how a users login attempts could continue to grow over time it seemed to me that you could be dealing with a large dataset at some point. That is why I thought it was better to keep the logic to get previous and subsequent login attempts within the database. My thought was if we could filtered our result set back before we brought it back then all we would have to do is map it to some struct.
+
 ## Third Party Library References : 
 
 While I tried to leverage a lot of the built in tools the Go language has to offer I did use a few other packages to get the job done
