@@ -5,13 +5,7 @@ The api takes a POST request to the `/loginRequest` endpoint with a json payload
 
 A response is returned in json format that contains location details of the current login attempt along with previous and subsequent location details of login attempts if they exist.
 
-<<<<<<< Updated upstream
-## Getting Started
-=======
-***
-
 ## Getting Started :
->>>>>>> Stashed changes
 1. First step is to clone this repo into a directory of your choosing:
    
    `$ git clone https://github.com/mysteryboy73/Superman-Detector.git`
@@ -26,11 +20,6 @@ A response is returned in json format that contains location details of the curr
     > This command will build a docker image named *superman-detector* via the commands listed in the *Dockerfile*. It will then start a container using that image which will start a server listening on port *1210*. It will also volume map the location */db/geolite2.db* to the container to utilize the *sqlite* db.
 
 4. When this container is running we can start to make requests to *http://localhost:1210/loginRequest*
-
-<<<<<<< Updated upstream
-## Making Request
-=======
-***
 
 ## Making A Request :
 
@@ -82,4 +71,3 @@ A response is returned in json format that contains location details of the curr
 ```
 
 >Note : Not every request will return a payload with all the details. To recieve all details the current request being made must have a previous and subsequent login attempt to be able to calculate the neccessary fields.
->>>>>>> Stashed changes
