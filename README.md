@@ -71,3 +71,17 @@ A response is returned in json format that contains location details of the curr
 ```
 
 >Note : Not every request will return a payload with all the details. To recieve all details the current request being made must have a previous and subsequent login attempt to be able to calculate the neccessary fields.
+
+## Assumptions / Design Decisions :
+
+## Third Party Library References : 
+
+While I tried to leverage a lot of the built in tools the Go language has to offer I did use a few other packages to get the job done
+
+* github.com/DATA-DOG/go-sqlmock - This package was great for creating a mock database that I could use during unit testing of my interactions with the database.
+  
+* github.com/jmoiron/sqlx - Sqlx provides extensions to Go's native database/sql library that allowed me to leverage some functions that made mapping db data to structs simple.
+  
+* github.com/mattn/go-sqlite3 - Provided a Sqlite3 driver so my code could interact with the sqlite db.
+  
+* github.com/umahmood/haversine - I did not feel the need to reinvent the wheel with the haversine formula. This package provides a function that takes coordinates of two desinations and reports back the distance.
