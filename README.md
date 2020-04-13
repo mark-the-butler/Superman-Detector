@@ -5,7 +5,13 @@ The api takes a POST request to the `/loginRequest` endpoint with a json payload
 
 A response is returned in json format that contains location details of the current login attempt along with previous and subsequent location details of login attempts if they exist.
 
+<<<<<<< Updated upstream
 ## Getting Started
+=======
+***
+
+## Getting Started :
+>>>>>>> Stashed changes
 1. First step is to clone this repo into a directory of your choosing:
    
    `$ git clone https://github.com/mysteryboy73/Superman-Detector.git`
@@ -21,4 +27,59 @@ A response is returned in json format that contains location details of the curr
 
 4. When this container is running we can start to make requests to *http://localhost:1210/loginRequest*
 
+<<<<<<< Updated upstream
 ## Making Request
+=======
+***
+
+## Making A Request :
+
+**URL** : `http://localhost:1210/loginRequest`
+
+**Method** : `POST`
+
+**Request Body :**
+> The request body is a json payload containing details about the users login attempt
+
+```
+{
+	"username": "Bob",
+	"unix_timestamp": 1611692790,
+	"event_uuid": "926C4CDA-A5F0-19AB-C097-A61431CB4BFA",
+	"ip_address": "1.0.212.0/23"
+}
+```
+**Response :**
+
+>The endpoint should return an HTTP Response code of *200 Ok* along with a json formatted response body including the following details
+
+```
+{
+    "currentGeo": {
+        "lat": 13.4,
+        "lon": 100,
+        "radius": 500
+    },
+    "travelToCurrentGeoSuspicious": true,
+    "traveFromCurrentGeoSuspicious": false,
+    "precedingIpAccess": {
+        "ip": "1.10.160.0/22",
+        "speed": 376,
+        "lat": 16.4792,
+        "lon": 104.6583,
+        "radius": 500,
+        "timestamp": 1611689190
+    },
+    "subsequentIpAccess": {
+        "ip": "1.0.75.0/24",
+        "speed": 2495,
+        "lat": 34.4593,
+        "lon": 132.4731,
+        "radius": 1,
+        "timestamp": 1611696390
+    }
+}
+```
+
+>Note : Not every request will return a payload with all the details. To recieve all details the current request being made must have a previous and subsequent login attempt to be able to calculate the neccessary fields.
+>>>>>>> Stashed changes
